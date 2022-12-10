@@ -53,81 +53,91 @@ Route::post('/logout', 'Auth\LoginController@logout')->name('post.logout');
 Route::get('/home', 'HomeController@index')->name('home');
 
 // API
-Route::get('/api/all/{rm}','KunjunganController@apiAll')->name('all.api');
-Route::get('/api/pilar/{rm}','KunjunganController@apiCariRM')->name('carirm.api');
-Route::get('/api/pilar/batalperiksa/{rm}','KunjunganController@apiBatalPeriksa')->name('batalperiksa.api');
-Route::get('/api/kunjungan','KunjunganController@apikunjungan')->name('kunjungan.api');
-Route::get('/api/kamar','PasienController@apikamar')->name('kamar.api');
+    // ANTROL
+    Route::get('/api/antrol','KunjunganController@apiAntrol')->name('api.antrol');
+    Route::get('/api/antrol/display','KunjunganController@apiDisplayAntrol')->name('api.displayAntrol');
+    Route::get('/api/jadwaldokter','KunjunganController@apiJadwalDokter')->name('api.jadwaldokter');
+    // LAB
+    Route::get('/api/all/{rm}','KunjunganController@apiAll')->name('all.api');
+    // CEKLIST IBS
+    Route::get('/api/pilar/{rm}','KunjunganController@apiCariRM')->name('carirm.api');
+    Route::get('/api/pilar/batalperiksa/{rm}','KunjunganController@apiBatalPeriksa')->name('batalperiksa.api');
+    Route::get('/api/kunjungan','KunjunganController@apikunjungan')->name('kunjungan.api');
+    Route::get('/api/kamar','PasienController@apikamar')->name('kamar.api');
+    // PPI
+    Route::get('/api/rm/{rm}','KunjunganController@apirm')->name('api.rm');
+    Route::get('/api/rmpoli/{rm}','KunjunganController@apirmpoli')->name('api.rmpoli');
+    // Route::get('/api/rmpoli/{rm}/poli/{poli}','KunjunganController@apigetrmpoli')->name('api.getrmpoli');
 
-    // Page Admin
-    Route::middleware(['auth'])->prefix('admin')->group(function (){
-        Route::get('/', function(){return view('page.admin.dashboard');})->name('admin.dashboard');
-        Route::get('/dashboard', function(){return view('page.admin.dashboard');})->name('admin.dashboard');
-    });
+// Page Admin
+Route::middleware(['auth'])->prefix('admin')->group(function (){
+    Route::get('/', function(){return view('page.admin.dashboard');})->name('admin.dashboard');
+    Route::get('/dashboard', function(){return view('page.admin.dashboard');})->name('admin.dashboard');
+});
 
 
-    // Page Direktur
-    Route::middleware(['auth:direktur'])->prefix('direktur')->group(function (){
-        // Route::get('/', function(){return view('page.direktur.dashboard');})->name('direktur.dashboard');
-        Route::get('/dashboard', function(){return view('page.direktur.dashboard');})->name('direktur.dashboard');
-        // Route::get('/dashboard', 'KunjunganController@index')->name('direktur.dashboard');
-        Route::get('/rekapharian', 'KunjunganController@index')->name('direktur.rekapharian');
-        Route::get('/rekapharian/cari', 'KunjunganController@filterKunjungan')->name('direktur.rekapharian.cari');
-        Route::get('/kamar', 'KamarController@index')->name('direktur.kamar');
-        Route::get('/cetakpdf','KunjunganController@generatePDF')->name('direktur.cetak');
-        Route::get('/cetakpdfold','KunjunganController@generatePDFold')->name('direktur.cetakold');
-    });
+// Page Direktur
+Route::middleware(['auth:direktur'])->prefix('direktur')->group(function (){
+    // Route::get('/', function(){return view('page.direktur.dashboard');})->name('direktur.dashboard');
+    Route::get('/dashboard', function(){return view('page.direktur.dashboard');})->name('direktur.dashboard');
+    // Route::get('/dashboard', 'KunjunganController@index')->name('direktur.dashboard');
+    Route::get('/rekapharian', 'KunjunganController@index')->name('direktur.rekapharian');
+    Route::get('/rekapharian/cari', 'KunjunganController@filterKunjungan')->name('direktur.rekapharian.cari');
+    Route::get('/kamar', 'KamarController@index')->name('direktur.kamar');
+    Route::get('/cetakpdf','KunjunganController@generatePDF')->name('direktur.cetak');
+    Route::get('/cetakpdfold','KunjunganController@generatePDFold')->name('direktur.cetakold');
+});
 
-    // Page Farmasi
-    Route::middleware(['auth:farmasi'])->prefix('farmasi')->group(function (){
-        Route::get('/', function(){return view('page.farmasi.dashboard');})->name('farmasi.dashboard');
-        Route::get('/dashboard', function(){return view('page.farmasi.dashboard');})->name('farmasi.dashboard');
-        Route::get('/lisinopril', 'PelayananController@obatLisinopril')->name('farmasi.lisinopril');
-        Route::get('/tanapres', 'PelayananController@obatTanapres')->name('farmasi.tanapres');
-        Route::get('/captopril', 'PelayananController@obatCaptopril')->name('farmasi.captopril');
-    });
+// Page Farmasi
+Route::middleware(['auth:farmasi'])->prefix('farmasi')->group(function (){
+    Route::get('/', function(){return view('page.farmasi.dashboard');})->name('farmasi.dashboard');
+    Route::get('/dashboard', function(){return view('page.farmasi.dashboard');})->name('farmasi.dashboard');
+    Route::get('/lisinopril', 'PelayananController@obatLisinopril')->name('farmasi.lisinopril');
+    Route::get('/tanapres', 'PelayananController@obatTanapres')->name('farmasi.tanapres');
+    Route::get('/captopril', 'PelayananController@obatCaptopril')->name('farmasi.captopril');
+});
 
-    // Page RM
-    Route::middleware(['auth:rm'])->prefix('rm')->group(function (){
-        // Route::get('/', function(){return view('page.rm.dashboard');})->name('rm.dashboard');
-        Route::get('/dashboard', 'RekamMedikController@index')->name('rm.dashboard');
-        Route::get('/rekapusia', 'RekamMedikController@rekapUsia')->name('rm.rekapusia');
-        Route::get('/rekapusia/poli', 'RekamMedikController@rekapUsiaPoli')->name('rm.rekapusiapoli');
-        Route::get('/rekapusia/cetak', 'RekamMedikController@cetakRekapUsia')->name('rm.rekapusia.cetak');
-        Route::get('/rekapusia/old', 'RekamMedikController@kunjunganPasienOld')->name('rm.rekapusiaold');
-        Route::get('/rekapusia/old/cetak', 'RekamMedikController@cetakRekapUsiaold')->name('rm.rekapusiaold.cetak');
-    });
+// Page RM
+Route::middleware(['auth:rm'])->prefix('rm')->group(function (){
+    // Route::get('/', function(){return view('page.rm.dashboard');})->name('rm.dashboard');
+    Route::get('/dashboard', 'RekamMedikController@index')->name('rm.dashboard');
+    Route::get('/rekapusia', 'RekamMedikController@rekapUsia')->name('rm.rekapusia');
+    Route::get('/rekapusia/poli', 'RekamMedikController@rekapUsiaPoli')->name('rm.rekapusiapoli');
+    Route::get('/rekapusia/cetak', 'RekamMedikController@cetakRekapUsia')->name('rm.rekapusia.cetak');
+    Route::get('/rekapusia/old', 'RekamMedikController@kunjunganPasienOld')->name('rm.rekapusiaold');
+    Route::get('/rekapusia/old/cetak', 'RekamMedikController@cetakRekapUsiaold')->name('rm.rekapusiaold.cetak');
+});
 
-    // Page Kantor
-    Route::middleware(['auth:kantor'])->prefix('kantor')->group(function (){
-        Route::get('/', function(){return view('page.kantor.dashboard');})->name('kantor.dashboard');
-        Route::get('/dashboard', function(){return view('page.kantor.dashboard');})->name('kantor.dashboard');
-        Route::resource('/rapat', 'KantorController');
-        // Route::get('/download/{id}', 'KantorController@download')->name('rapat.download');
-        // Route::post('rapat/create/upload', 'KantorController@upload')->name('rapat.upload');
-    });
+// Page Kantor
+Route::middleware(['auth:kantor'])->prefix('kantor')->group(function (){
+    Route::get('/', function(){return view('page.kantor.dashboard');})->name('kantor.dashboard');
+    Route::get('/dashboard', function(){return view('page.kantor.dashboard');})->name('kantor.dashboard');
+    Route::resource('/rapat', 'KantorController');
+    // Route::get('/download/{id}', 'KantorController@download')->name('rapat.download');
+    // Route::post('rapat/create/upload', 'KantorController@upload')->name('rapat.upload');
+});
 
-    // Page Keuangan
-    Route::middleware(['auth:keuangan'])->prefix('keuangan')->group(function (){
-        Route::get('/', function(){return view('page.keuangan.dashboard');})->name('keuangan.dashboard');
-        Route::get('/dashboard', function(){return view('page.keuangan.dashboard');})->name('keuangan.dashboard');
-    });
+// Page Keuangan
+Route::middleware(['auth:keuangan'])->prefix('keuangan')->group(function (){
+    Route::get('/', function(){return view('page.keuangan.dashboard');})->name('keuangan.dashboard');
+    Route::get('/dashboard', function(){return view('page.keuangan.dashboard');})->name('keuangan.dashboard');
+});
 
-    // Page Kebidanan
-    Route::middleware(['auth:kebidanan'])->prefix('kebidanan')->group(function (){
-        Route::get('/', function(){return view('page.kebidanan.dashboard');})->name('kebidanan.dashboard');
-        Route::get('/dashboard', function(){return view('page.kebidanan.dashboard');})->name('kebidanan.dashboard');
-        Route::get('/skl', function(){return view('page.kebidanan.skl');})->name('kebidanan.skl');
-    });
+// Page Kebidanan
+Route::middleware(['auth:kebidanan'])->prefix('kebidanan')->group(function (){
+    Route::get('/', function(){return view('page.kebidanan.dashboard');})->name('kebidanan.dashboard');
+    Route::get('/dashboard', function(){return view('page.kebidanan.dashboard');})->name('kebidanan.dashboard');
+    Route::get('/skl', function(){return view('page.kebidanan.skl');})->name('kebidanan.skl');
+});
 
-    // Page Other_Role
-    Route::middleware(['auth:other_role'])->prefix('other_role')->group(function (){
-        Route::get('/', function(){return view('page.other-role.dashboard');})->name('other.role.dashboard');
-        Route::get('/dashboard', function(){return view('page.other-role.dashboard');})->name('other.role.dashboard');
-    });
+// Page Other_Role
+Route::middleware(['auth:other_role'])->prefix('other_role')->group(function (){
+    Route::get('/', function(){return view('page.other-role.dashboard');})->name('other.role.dashboard');
+    Route::get('/dashboard', function(){return view('page.other-role.dashboard');})->name('other.role.dashboard');
+});
 
-    // Page Guest
-    Route::get('/', function () {
-        return view('page.guest.landing-page');
-    });
-    Route::get('/infokamar', 'PasienController@index')->name('info.kamar');
+// Page Guest
+Route::get('/', function () {
+    return view('page.guest.landing-page');
+});
+Route::get('/infokamar', 'PasienController@index')->name('info.kamar');

@@ -57,6 +57,83 @@ class KunjunganController extends Controller
         return response()->json($showdata, 200);
     }
 
+    public function apirm($rm)
+    {
+        $data = DB::table('DAT_PASIEN')
+        ->join('REG_KUNJUNGANPASIEN','DAT_PASIEN.DAT_PASIEN','=','REG_KUNJUNGANPASIEN.DAT_PASIEN')
+        ->join('REF_JNSKELAMIN','REF_JNSKELAMIN.REF_JNSKELAMIN','=','DAT_PASIEN.REF_JNSKELAMIN')
+        // ->join('REF_DESA','REF_DESA.REF_DESA','=','DAT_PASIEN.REF_DESA')
+        ->where('DAT_PASIEN.DAT_PASIEN', $rm)
+        ->orderBy('REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN', 'DESC')
+        ->first();
+        
+        if (!empty($data)) {
+            $logic = 1;
+        } else {
+            $logic = 0;
+        }
+        
+
+        $showdata = [
+            // 'idpasien' => $value['DAT_PASIEN'],
+            'data' => $data,
+            'logic' => $logic
+        ];
+
+        return response()->json($showdata, 200);
+    }
+
+    public function apirmpoli($rm)
+    {
+        $data = DB::table('DAT_PASIEN')
+        ->join('REG_KUNJUNGANPASIEN','DAT_PASIEN.DAT_PASIEN','=','REG_KUNJUNGANPASIEN.DAT_PASIEN')
+        ->join('REF_JNSKELAMIN','REF_JNSKELAMIN.REF_JNSKELAMIN','=','DAT_PASIEN.REF_JNSKELAMIN')
+        ->join('REF_DESA','REF_DESA.REF_DESA','=','DAT_PASIEN.REF_DESA')
+        ->where('DAT_PASIEN.DAT_PASIEN', $rm)
+        ->orderBy('REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN', 'DESC')
+        ->first();
+
+        $poli = DB::table('DAT_PASIEN')
+        ->join('REG_KUNJUNGANPASIEN','DAT_PASIEN.DAT_PASIEN','=','REG_KUNJUNGANPASIEN.DAT_PASIEN')
+        ->join('TRANS_AKOMODASI','REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN','=','TRANS_AKOMODASI.REG_KUNJUNGANPASIEN')
+        ->join('REF_SUBINSTALASI','TRANS_AKOMODASI.REF_SUBINSTALASI_POLIKLINIK','=','REF_SUBINSTALASI.REF_SUBINSTALASI')
+        ->whereIn('REF_SUBINSTALASI.REF_INSTALASI', ['02','03'])
+        ->where('DAT_PASIEN.DAT_PASIEN', $rm)
+        ->select('REF_SUBINSTALASI.SUBINSTALASI')
+        ->groupBy('REF_SUBINSTALASI.SUBINSTALASI')
+        // ->orderBy('REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN', 'DESC')
+        ->get();
+
+        $bayar = DB::table('DAT_PASIEN')
+        ->join('REG_KUNJUNGANPASIEN','DAT_PASIEN.DAT_PASIEN','=','REG_KUNJUNGANPASIEN.DAT_PASIEN')
+        ->join('REF_CARABAYAR','REG_KUNJUNGANPASIEN.REF_CARABAYAR','=','REF_CARABAYAR.REF_CARABAYAR')
+        ->join('TRANS_AKOMODASI','REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN','=','TRANS_AKOMODASI.REG_KUNJUNGANPASIEN')
+        ->join('REF_SUBINSTALASI','TRANS_AKOMODASI.REF_SUBINSTALASI_POLIKLINIK','=','REF_SUBINSTALASI.REF_SUBINSTALASI')
+        ->whereIn('REF_SUBINSTALASI.REF_INSTALASI', ['02','03'])
+        ->where('DAT_PASIEN.DAT_PASIEN', $rm)
+        ->select('REF_CARABAYAR.CARABAYAR')
+        ->groupBy('REF_CARABAYAR.CARABAYAR')
+        // ->orderBy('REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN', 'DESC')
+        ->get();
+        
+        if (!empty($data)) {
+            $logic = 1;
+        } else {
+            $logic = 0;
+        }
+        
+
+        $showdata = [
+            // 'idpasien' => $value['DAT_PASIEN'],
+            'data' => $data,
+            'poli' => $poli,
+            'bayar' => $bayar,
+            'logic' => $logic
+        ];
+
+        return response()->json($showdata, 200);
+    }
+
     public function apiAll($rm)
     {
         // $showdata = [];
@@ -69,9 +146,15 @@ class KunjunganController extends Controller
         $data = DB::table('DAT_PASIEN')
         ->join('REG_KUNJUNGANPASIEN','DAT_PASIEN.DAT_PASIEN','=','REG_KUNJUNGANPASIEN.DAT_PASIEN')
         ->join('REF_JNSKELAMIN','REF_JNSKELAMIN.REF_JNSKELAMIN','=','DAT_PASIEN.REF_JNSKELAMIN')
-        ->join('REF_DESA','REF_DESA.REF_DESA','=','DAT_PASIEN.REF_DESA')
+        // ->join('REF_DESA','REF_DESA.REF_DESA','=','DAT_PASIEN.REF_DESA') //Ref_Desa ada yg kosong!!
+        ->join('REF_KODEWILAYAH','REF_KODEWILAYAH.REF_KODEWILAYAH','=','DAT_PASIEN.REF_KODEWILAYAH') //Ref_Desa ada yg kosong!!
         ->where('DAT_PASIEN.DAT_PASIEN', $rm)
+        ->orderBy('REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN', 'DESC')
         ->first();
+        // ->get();
+
+        // print_r($data);
+        // die();
 
         return response()->json($data, 200);
     }
@@ -86,7 +169,7 @@ class KunjunganController extends Controller
                 ->join('REF_DESA','REF_DESA.REF_DESA','=','DAT_PASIEN.REF_DESA')
                 ->where('DAT_PASIEN.DAT_PASIEN', $dat_pasien)
                 ->select('DAT_PASIEN.DAT_PASIEN','DAT_PASIEN.NAMAPASIEN','REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN','REG_KUNJUNGANPASIEN.UMUR','REF_JNSKELAMIN.JNSKELAMIN','REG_KUNJUNGANPASIEN.TGL_REGISTRASI','REG_KUNJUNGANPASIEN.TGL_DISCHARGE')
-                ->orderBy('REG_KUNJUNGANPASIEN', 'DESC')
+                ->orderBy('REG_KUNJUNGANPASIEN.REG_KUNJUNGANPASIEN', 'DESC')
                 ->get();
 
         if ($show == '') {
@@ -138,8 +221,8 @@ class KunjunganController extends Controller
         // Verify Pasien Sudah Dipulangkan Belum [TRANS_AKOMODASI]    
         foreach ($getTA as $key => $value) {
             if ($value->pulang == null) {
-                $now = Carbon::now()->isoFormat('YYYY-MM-DD HH:mm:ss');
-                DB::table('TRANS_AKOMODASI')->where('TRANS_AKOMODASI', $value->kode)->update(array('TGLKELUAR' => $now));
+                // $now = Carbon::now()->isoFormat('YYYY-MM-DD HH:mm:ss');
+                // DB::table('TRANS_AKOMODASI')->where('TRANS_AKOMODASI', $value->kode)->update(array('TGLKELUAR' => $now));
                 
                 $title = 'Mohon Maaf!!!';
                 $icon = 'error';
@@ -156,19 +239,22 @@ class KunjunganController extends Controller
                 return response()->json($data, 200);
             }
         }
-        // print_r($getTA);
-        // die();
+        
         DB::table('DAT_ASSEMBLING')->where('REG_KUNJUNGANPASIEN', $reg_kunjunganpasien)->delete();
         DB::table('DAT_DIGITALRM')->where('REG_KUNJUNGANPASIEN', $reg_kunjunganpasien)->delete();
         // DB::table('TRANS_JNSPELAYANAN')->where('TRANS_AKOMODASI', $rm)->delete();
         foreach ($getJP as $key => $value) {
+            DB::table('DETAIL_TRANSOBATALKES')->where('TRANS_JNSPELAYANAN', $value->kode)->delete();
             DB::table('TRANS_JNSPELAYANAN')->where('TRANS_JNSPELAYANAN', $value->kode)->delete();
         }
         // DB::table('TRANS_AKOMODASI')->where('REG_KUNJUNGANPASIEN', $reg_kunjunganpasien)->delete();
         foreach ($getTA as $key => $value) {
-            if ($value->pulang == null) {
-                $now = Carbon::now()->isoFormat('YYYY-MM-DD HH:mm:ss');
-            }
+            // Add Tgl in TRANS_AKOMODASI->TGLKELUAR
+            // if ($value->pulang == null) {
+            //     $now = Carbon::now()->isoFormat('YYYY-MM-DD HH:mm:ss');
+            // }
+            DB::table('DAT_PASIENBOOK')->where('TRANS_AKOMODASI_CHECKIN', $value->kode)->delete();
+            DB::table('TRANS_DIETMAKAN')->where('TRANS_AKOMODASI', $value->kode)->delete();
             DB::table('TRANS_PEMBAYARANPASIEN')->where('TRANS_AKOMODASI', $value->kode)->delete();
             DB::table('TRANS_AKOMODASI')->where('TRANS_AKOMODASI', $value->kode)->delete();
         }
@@ -185,8 +271,6 @@ class KunjunganController extends Controller
         //->where('DAT_ASSEMBLING.REG_KUNJUNGANPASIEN', $rm)
         //->get();
 
-        // print_r($data);
-        // die();
         //->delete();
 
         $title = 'Yeayyyy!!!';
@@ -201,6 +285,8 @@ class KunjunganController extends Controller
             'icon' => $icon,
             'msg' => $msg
         ];
+        // print_r($data);
+        // die();
 
         return response()->json($data, 200);
     }
@@ -810,5 +896,67 @@ class KunjunganController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function apiAntrol()
+    {
+        $from = Carbon::now()->subDays(30)->isoFormat('YYYY-MM-DD');
+        $to = Carbon::now()->isoFormat('YYYY-MM-DD');
+        $tomorow = Carbon::now()->addDays(1)->isoFormat('YYYY-MM-DD');
+        $data = DB::table('DAT_PASIENBOOK')
+        // ->join('REG_KUNJUNGANPASIEN','DAT_PASIEN.DAT_PASIEN','=','REG_KUNJUNGANPASIEN.DAT_PASIEN')
+        // ->join('REF_JNSKELAMIN','REF_JNSKELAMIN.REF_JNSKELAMIN','=','DAT_PASIEN.REF_JNSKELAMIN')
+        // ->join('REF_DESA','REF_DESA.REF_DESA','=','DAT_PASIEN.REF_DESA')
+        ->where('TASKID_99', null)
+        ->whereNotNull('TASKID_01')
+        ->whereNotNull('TASKID_02')
+        ->whereNotNull('TASKID_03')
+        // ->whereNotNull('TASKID_06')
+        ->whereBetween('TGL_KUNJUNGAN',[$to,$tomorow])
+        ->orderBy('TGL_CHECKIN', 'DESC')
+        ->get();
+
+        return response()->json($data, 200);
+    }
+
+    public function apiDisplayAntrol()
+    {
+        $from = Carbon::now()->subDays(30)->isoFormat('YYYY-MM-DD');
+        $to = Carbon::now()->isoFormat('YYYY-MM-DD');
+        $tomorow = Carbon::now()->addDays(1)->isoFormat('YYYY-MM-DD');
+        $data = DB::table('DAT_PASIENBOOK')
+        // ->join('REG_KUNJUNGANPASIEN','DAT_PASIEN.DAT_PASIEN','=','REG_KUNJUNGANPASIEN.DAT_PASIEN')
+        // ->join('REF_JNSKELAMIN','REF_JNSKELAMIN.REF_JNSKELAMIN','=','DAT_PASIEN.REF_JNSKELAMIN')
+        // ->join('REF_DESA','REF_DESA.REF_DESA','=','DAT_PASIEN.REF_DESA')
+        ->select('DAT_PASIENBOOK','DAT_PASIEN','NAMAPASIEN','ALAMAT','TGL_CHECKIN','TASKID_04','TASKID_05','TASKID_06','TASKID_07')
+        ->where('TASKID_99', null)
+        ->whereNotNull('TASKID_01')
+        ->whereNotNull('TASKID_02')
+        ->whereNotNull('TASKID_03')
+        ->whereNotNull('TASKID_06')
+        // ->where('TASKID_07', null)
+        ->whereBetween('TGL_KUNJUNGAN',[$to,$tomorow])
+        ->orderBy('TASKID_04', 'ASC')
+        ->limit(20)
+        ->get();
+
+        return response()->json($data, 200);
+    }
+
+    public function apiJadwalDokter()
+    {
+        // 03900103
+        $data = DB::table('SET_JAGAKLINIK')
+        ->join('DAT_KARYAWAN','SET_JAGAKLINIK.DAT_KARYAWAN','=','DAT_KARYAWAN.DAT_KARYAWAN')
+        ->join('REF_SUBINSTALASI','SET_JAGAKLINIK.REF_SUBINSTALASI','=','REF_SUBINSTALASI.REF_SUBINSTALASI')
+        ->select('DAT_KARYAWAN.NAMA','REF_SUBINSTALASI.SUBINSTALASI','REF_SUBINSTALASI.REF_POLIBPJS','SET_JAGAKLINIK.*')
+        ->whereIn('SET_JAGAKLINIK.DAT_JNSPELAYANAN', ['03900103','03900108'])
+        ->where('SET_JAGAKLINIK.JAGA', '1')
+        ->where('SET_JAGAKLINIK.REF_SUBINSTALASI', '<>', '0396')
+        ->orderBy('SET_JAGAKLINIK.REF_SUBINSTALASI', 'ASC')
+        // ->limit(20)
+        ->get();
+        
+        return response()->json($data, 200);
     }
 }
